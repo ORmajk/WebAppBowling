@@ -1,7 +1,25 @@
+using Microsoft.EntityFrameworkCore;
+using WebAppBowling.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Добавление контекста базы данных
+builder.Services.AddDbContext<BowlingContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Добавление сессий для корзины
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(24);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// Добавление HttpContextAccessor для доступа к сессии в сервисах
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
@@ -9,21 +27,19 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+else
+{
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
-app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
-
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
