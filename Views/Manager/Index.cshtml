@@ -1,0 +1,99 @@
+@{
+    ViewData["Title"] = "Панель менеджера";
+    var lowStock = ViewBag.LowStock as List<Product> ?? new List<Product>();
+    var nearBookings = ViewBag.NearBookings as List<Booking> ?? new List<Booking>();
+    decimal bookingMoney = ViewBag.BookingMoney;
+    decimal orderMoney = ViewBag.OrderMoney;
+}
+
+<h2 class="page-title">Сводка</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-2 col-6">
+        <div class="card-club text-center">
+            <p class="price fs-2 mb-0">@ViewBag.BookingsToday</p>
+            <p class="small mb-0">броней сегодня</p>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="card-club text-center">
+            <p class="price fs-2 mb-0">@ViewBag.NewBookings</p>
+            <p class="small mb-0">неоплаченных броней</p>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="card-club text-center">
+            <p class="price fs-2 mb-0">@ViewBag.NewOrders</p>
+            <p class="small mb-0">заказов в работе</p>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="card-club text-center">
+            <p class="price fs-2 mb-0">@ViewBag.ClientsCount</p>
+            <p class="small mb-0">клиентов</p>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="card-club text-center">
+            <p class="price fs-5 mb-0">@bookingMoney.ToString("N0") ₽</p>
+            <p class="small mb-0">выручка по броням</p>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="card-club text-center">
+            <p class="price fs-5 mb-0">@orderMoney.ToString("N0") ₽</p>
+            <p class="small mb-0">выручка бара</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <h4 class="page-title mt-0">Ближайшие бронирования</h4>
+        @if (nearBookings.Count == 0)
+        {
+            <p>Ближайших броней нет.</p>
+        }
+        else
+        {
+            <table class="table table-bordered table-club">
+                <thead>
+                    <tr><th>Номер</th><th>Клиент</th><th>Дорожка</th><th>Время</th><th>Статус</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in nearBookings)
+                    {
+                        <tr>
+                            <td>@b.BookingNumber</td>
+                            <td>@b.Client?.FullName</td>
+                            <td>№@b.Lane?.LaneNumber</td>
+                            <td>@b.StartTime.ToString("dd.MM HH:mm")–@b.EndTime.ToString("HH:mm")</td>
+                            <td><partial name="_StatusBadge" model="b.Status" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        <a asp-action="Bookings" class="btn btn-club">Все бронирования</a>
+    </div>
+    <div class="col-md-4">
+        <h4 class="page-title mt-0">Заканчиваются товары</h4>
+        @if (lowStock.Count == 0)
+        {
+            <p>Все товары в достатке.</p>
+        }
+        else
+        {
+            <ul class="list-group mb-2">
+                @foreach (var p in lowStock)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>@p.Name</span>
+                        <b class="@(p.Quantity == 0 ? "text-danger" : "")">@p.Quantity шт.</b>
+                    </li>
+                }
+            </ul>
+        }
+        <a asp-action="Products" class="btn btn-club">Товары</a>
+    </div>
+</div>

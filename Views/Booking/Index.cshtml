@@ -1,0 +1,65 @@
+@model List<Lane>
+@{
+    ViewData["Title"] = "Дорожки";
+    DateTime date = ViewBag.Date;
+    var bookings = ViewBag.Bookings as List<Booking> ?? new List<Booking>();
+}
+
+<h2 class="page-title">Дорожки и свободное время</h2>
+
+<form method="get" asp-action="Index" class="row g-2 align-items-end mb-3">
+    <div class="col-auto">
+        <label class="form-label">Выберите дату</label>
+        <input type="date" name="date" class="form-control" value="@date.ToString("yyyy-MM-dd")"
+               min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-club">Показать</button>
+    </div>
+</form>
+
+<p>Занятое время на <b>@date.ToString("dd.MM.yyyy")</b> отмечено красным. Клуб работает с 10:00 до 24:00.</p>
+
+<div class="row g-3 mb-4">
+    @foreach (var lane in Model)
+    {
+        var laneBookings = bookings.Where(b => b.LaneId == lane.Id).ToList();
+        bool repair = lane.Status?.Name == "Требует обслуживания";
+        <div class="col-md-4">
+            <div class="card-club">
+                <img src="@ImageHelper.Lane(Env, lane)" alt="Дорожка №@lane.LaneNumber" class="product-photo mb-2" onerror="this.onerror=null; this.src='/images/lanes/Norm_lanes.jpg';" />
+                <div class="d-flex justify-content-between">
+                    <h5>Дорожка №@lane.LaneNumber</h5>
+                    @if (repair)
+                    {
+                        <partial name="_StatusBadge" model="lane.Status!.Name" />
+                    }
+                </div>
+                <p class="mb-1">@lane.LaneType?.Name, до @lane.Capacity человек</p>
+                <p class="price mb-2">@lane.PricePerHour.ToString("N0") руб./час</p>
+
+                <p class="mb-1"><b>Занято:</b></p>
+                <div class="mb-2">
+                    @if (laneBookings.Count == 0)
+                    {
+                        <span class="text-success">весь день свободна</span>
+                    }
+                    @foreach (var b in laneBookings)
+                    {
+                        <span class="busy">@b.StartTime.ToString("HH:mm")–@b.EndTime.ToString("HH:mm")</span>
+                    }
+                </div>
+
+                @if (!repair)
+                {
+                    <a class="btn btn-club btn-sm" asp-action="Create" asp-route-laneId="@lane.Id"
+                       asp-route-date="@date.ToString("yyyy-MM-dd")">Забронировать</a>
+                }
+                else
+                {
+                    <span class="text-muted">Сейчас недоступна для брони</span>
+                }
+            </div>
+        </div>
+    }
+</div>

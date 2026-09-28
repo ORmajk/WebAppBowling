@@ -1,0 +1,48 @@
+@model List<Lane>
+@{
+    ViewData["Title"] = "Дорожки";
+    var statuses = ViewBag.Statuses as List<LaneStatus> ?? new List<LaneStatus>();
+}
+
+<h2 class="page-title">Дорожки</h2>
+<p class="text-muted">Здесь можно поменять состояние дорожки (например, отправить на обслуживание) и цену за час.
+    Добавлять и удалять дорожки можно в программе для сотрудников.</p>
+
+<table class="table table-bordered table-club align-middle">
+    <thead>
+        <tr>
+            <th style="width:90px">Фото</th>
+            <th>Номер</th>
+            <th>Категория</th>
+            <th>Вместимость</th>
+            <th>Состояние</th>
+            <th style="width:420px">Изменить</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var lane in Model)
+        {
+            <tr>
+                <td><img src="@ImageHelper.Lane(Env, lane)" alt="" class="product-thumb" onerror="this.onerror=null; this.src='/images/lanes/Norm_lanes.jpg';" /></td>
+                <td>№@lane.LaneNumber</td>
+                <td>@lane.LaneType?.Name</td>
+                <td>@lane.Capacity чел.</td>
+                <td><partial name="_StatusBadge" model="lane.Status?.Name ?? string.Empty" /></td>
+                <td>
+                    <form asp-action="LaneUpdate" method="post" class="d-flex gap-1">
+                        <input type="hidden" name="id" value="@lane.Id" />
+                        <select name="statusId" class="form-select form-select-sm">
+                            @foreach (var s in statuses)
+                            {
+                                <option value="@s.Id" selected="@(s.Id == lane.StatusId)">@s.Name</option>
+                            }
+                        </select>
+                        <input type="text" name="price" value="@lane.PricePerHour.ToString("0.##")" class="form-control form-control-sm" style="width:100px" />
+                        <span class="align-self-center small">₽/ч</span>
+                        <button type="submit" class="btn btn-sm btn-club">Сохранить</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

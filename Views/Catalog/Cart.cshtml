@@ -1,0 +1,77 @@
+@model List<CartItem>
+@{
+    ViewData["Title"] = "Корзина";
+    decimal total = ViewBag.Total;
+    bool isClient = Context.Session.GetInt32("ClientId") != null;
+}
+
+<h2 class="page-title">Корзина</h2>
+
+@if (Model.Count == 0)
+{
+    <p>Корзина пуста. <a asp-action="Index">Перейти в магазин</a></p>
+}
+else
+{
+    <table class="table table-bordered table-club align-middle">
+        <thead>
+            <tr>
+                <th>Товар</th>
+                <th>Цена</th>
+                <th style="width:200px">Количество</th>
+                <th>Сумма</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Price.ToString("N2") руб.</td>
+                    <td>
+                        <form asp-action="UpdateCart" method="post" class="d-flex gap-2">
+                            <input type="hidden" name="id" value="@item.ProductId" />
+                            <input type="number" name="quantity" value="@item.Quantity" min="0" class="form-control form-control-sm" style="width:70px" />
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">OK</button>
+                        </form>
+                    </td>
+                    <td>@item.Total.ToString("N2") руб.</td>
+                    <td>
+                        <form asp-action="RemoveFromCart" method="post">
+                            <input type="hidden" name="id" value="@item.ProductId" />
+                            <button type="submit" class="btn btn-sm btn-danger-club">Удалить</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <p class="fs-4 text-end">Итого: <span class="price">@total.ToString("N2") руб.</span></p>
+
+    <div class="form-box">
+        <h5 class="page-title mt-0">Оформление заказа</h5>
+        @if (!isClient)
+        {
+            <p class="text-danger">Чтобы оформить заказ, нужно <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Catalog/Cart">войти</a>
+                или <a asp-controller="Account" asp-action="Register">зарегистрироваться</a>.</p>
+        }
+        <form asp-action="Checkout" method="post">
+            <div class="mb-3">
+                <label class="form-label">Способ оплаты</label>
+                <select name="paymentMethod" class="form-select">
+                    <option>Наличные</option>
+                    <option>Карта</option>
+                    <option>Онлайн</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Комментарий (например, номер дорожки)</label>
+                <input type="text" name="comment" class="form-control" maxlength="300" />
+            </div>
+            <button type="submit" class="btn btn-club w-100">Оформить заказ</button>
+        </form>
+        <p class="small text-muted mt-2 mb-0">Заказ можно забрать на стойке бара или попросить принести к дорожке.</p>
+    </div>
+}

@@ -1,0 +1,81 @@
+@model List<Booking>
+@{
+    ViewData["Title"] = "Бронирования";
+    var statuses = ViewBag.Statuses as List<string> ?? new List<string>();
+    string? status = ViewBag.Status;
+    DateTime? date = ViewBag.Date;
+}
+
+<h2 class="page-title">Бронирования</h2>
+
+<form method="get" asp-action="Bookings" class="row g-2 align-items-end mb-3">
+    <div class="col-md-3">
+        <label class="form-label">Поиск (номер, клиент)</label>
+        <input type="text" name="search" class="form-control" value="@ViewBag.Search" />
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Статус</label>
+        <select name="status" class="form-select">
+            <option value="">Все</option>
+            @foreach (var s in statuses)
+            {
+                <option value="@s" selected="@(s == status)">@s</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Дата</label>
+        <input type="date" name="date" class="form-control" value="@(date?.ToString("yyyy-MM-dd"))" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-club w-100">Найти</button>
+    </div>
+    <div class="col-md-2">
+        <a asp-action="Bookings" class="btn btn-outline-secondary w-100">Сбросить</a>
+    </div>
+</form>
+
+<p class="text-muted">Найдено: @Model.Count</p>
+
+<table class="table table-bordered table-club align-middle">
+    <thead>
+        <tr>
+            <th>Номер</th>
+            <th>Клиент</th>
+            <th>Телефон</th>
+            <th>Дорожка</th>
+            <th>Время</th>
+            <th>Сумма</th>
+            <th>Оплата</th>
+            <th>Статус</th>
+            <th style="width:220px">Изменить статус</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var b in Model)
+        {
+            <tr>
+                <td>@b.BookingNumber</td>
+                <td>@b.Client?.FullName</td>
+                <td>@b.Client?.Phone</td>
+                <td>№@b.Lane?.LaneNumber</td>
+                <td>@b.StartTime.ToString("dd.MM.yyyy HH:mm")–@b.EndTime.ToString("HH:mm")</td>
+                <td>@b.TotalAmount.ToString("N2")</td>
+                <td>@b.PaymentMethod</td>
+                <td><partial name="_StatusBadge" model="b.Status" /></td>
+                <td>
+                    <form asp-action="BookingStatus" method="post" class="d-flex gap-1">
+                        <input type="hidden" name="id" value="@b.Id" />
+                        <select name="status" class="form-select form-select-sm">
+                            @foreach (var s in statuses)
+                            {
+                                <option value="@s" selected="@(s == b.Status)">@s</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-club">OK</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,80 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "Заказы";
+    var statuses = ViewBag.Statuses as List<string> ?? new List<string>();
+    string? status = ViewBag.Status;
+}
+
+<h2 class="page-title">Заказы бара и магазина</h2>
+
+<form method="get" asp-action="Orders" class="row g-2 align-items-end mb-3">
+    <div class="col-md-3">
+        <label class="form-label">Статус</label>
+        <select name="status" class="form-select">
+            <option value="">Все</option>
+            @foreach (var s in statuses)
+            {
+                <option value="@s" selected="@(s == status)">@s</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-club w-100">Показать</button>
+    </div>
+</form>
+
+@if (Model.Count == 0)
+{
+    <p>Заказов нет.</p>
+}
+else
+{
+    <table class="table table-bordered table-club align-middle">
+        <thead>
+            <tr>
+                <th>Номер</th>
+                <th>Дата</th>
+                <th>Клиент</th>
+                <th>Состав заказа</th>
+                <th>Сумма</th>
+                <th>Оплата</th>
+                <th>Комментарий</th>
+                <th>Статус</th>
+                <th style="width:220px">Изменить статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var o in Model)
+            {
+                <tr>
+                    <td>@o.OrderNumber</td>
+                    <td>@o.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@o.Client?.FullName<br /><span class="small text-muted">@o.Client?.Phone</span></td>
+                    <td>
+                        @foreach (var item in o.OrderItems)
+                        {
+                            <div>@item.Product?.Name × @item.Quantity</div>
+                        }
+                    </td>
+                    <td>@o.TotalAmount.ToString("N2")</td>
+                    <td>@o.PaymentMethod</td>
+                    <td>@o.Comment</td>
+                    <td><partial name="_StatusBadge" model="o.Status" /></td>
+                    <td>
+                        <form asp-action="OrderStatus" method="post" class="d-flex gap-1">
+                            <input type="hidden" name="id" value="@o.Id" />
+                            <select name="status" class="form-select form-select-sm">
+                                @foreach (var s in statuses)
+                                {
+                                    <option value="@s" selected="@(s == o.Status)">@s</option>
+                                }
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-club">OK</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p class="small text-muted">При отмене заказа товары автоматически возвращаются на склад.</p>
+}

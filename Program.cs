@@ -1,29 +1,33 @@
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using WebAppBowling.Data;
 
+// СЂСѓСЃСЃРєРёР№ С„РѕСЂРјР°С‚ С‡РёСЃРµР» Рё РґР°С‚ (С†РµРЅР° "590,50", РґР°С‚Р° "29.09.2026")
+var culture = new CultureInfo("ru-RU");
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// MVC
 builder.Services.AddControllersWithViews();
 
-// Добавление контекста базы данных
+// РїРѕРґРєР»СЋС‡РµРЅРёРµ Рє Р±Р°Р·Рµ РґР°РЅРЅС‹С… BowlingClub
 builder.Services.AddDbContext<BowlingContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Добавление сессий для корзины
+// СЃРµСЃСЃРёСЏ - РІ РЅРµР№ С…СЂР°РЅРёРј, РєС‚Рѕ РІРѕС€С‘Р» РЅР° СЃР°Р№С‚, Рё РєРѕСЂР·РёРЅСѓ
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromHours(24);
+    options.IdleTimeout = TimeSpan.FromHours(2);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-
-// Добавление HttpContextAccessor для доступа к сессии в сервисах
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -35,7 +39,10 @@ else
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
+app.UseRouting();
+app.UseSession();
 app.UseAuthorization();
 
 app.MapControllerRoute(

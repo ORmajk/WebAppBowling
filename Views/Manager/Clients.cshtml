@@ -1,0 +1,46 @@
+@model List<Client>
+@{
+    ViewData["Title"] = "Клиенты";
+}
+
+<h2 class="page-title">Клиенты</h2>
+
+<form method="get" asp-action="Clients" class="row g-2 align-items-end mb-3">
+    <div class="col-md-4">
+        <label class="form-label">Поиск (ФИО, телефон)</label>
+        <input type="text" name="search" class="form-control" value="@ViewBag.Search" />
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-club w-100">Найти</button>
+    </div>
+</form>
+
+<table class="table table-bordered table-club">
+    <thead>
+        <tr>
+            <th>ФИО</th>
+            <th>Телефон</th>
+            <th>Email</th>
+            <th>Дата рег.</th>
+            <th>Баллы</th>
+            <th>Броней</th>
+            <th>Заказов</th>
+            <th>На сайте</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.FullName</td>
+                <td>@c.Phone</td>
+                <td>@c.Email</td>
+                <td>@c.RegistrationDate.ToString("dd.MM.yyyy")</td>
+                <td>@c.Points</td>
+                <td>@c.Bookings.Count</td>
+                <td>@c.Orders.Count</td>
+                <td>@(string.IsNullOrEmpty(c.Login) ? "—" : c.Login)</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,73 @@
+@model List<Product>
+@{
+    ViewData["Title"] = "Бар и магазин";
+    var categories = ViewBag.Categories as List<string> ?? new List<string>();
+    string? category = ViewBag.Category;
+    string? sort = ViewBag.Sort;
+}
+
+<h2 class="page-title">Бар и магазин</h2>
+
+<form method="get" asp-action="Index" class="row g-2 align-items-end mb-3">
+    <div class="col-md-3">
+        <label class="form-label">Категория</label>
+        <select name="category" class="form-select">
+            <option value="">Все категории</option>
+            @foreach (var c in categories)
+            {
+                <option value="@c" selected="@(c == category)">@c</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Поиск</label>
+        <input type="text" name="search" class="form-control" value="@ViewBag.Search" placeholder="Название товара" />
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Сортировка</label>
+        <select name="sort" class="form-select">
+            <option value="">По категориям</option>
+            <option value="price_asc" selected="@(sort == "price_asc")">Сначала дешевле</option>
+            <option value="price_desc" selected="@(sort == "price_desc")">Сначала дороже</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-club w-100">Найти</button>
+    </div>
+</form>
+
+@if (Model.Count == 0)
+{
+    <p>Ничего не найдено.</p>
+}
+
+<div class="row g-3 mb-4">
+    @foreach (var p in Model)
+    {
+        <div class="col-md-4 col-lg-3">
+            <div class="card-club d-flex flex-column">
+                <img src="@ImageHelper.Product(Env, p.ImageUrl)" alt="@p.Name"
+                     class="product-photo mb-2" onerror="this.onerror=null; this.src='/images/products/no-photo.svg';" />
+                <h5>@p.Name</h5>
+                <p class="text-muted small mb-1">@p.Category</p>
+                <p class="small flex-grow-1">@p.Description</p>
+                <p class="price mb-1">@p.Price.ToString("N0") руб.</p>
+
+                @if (p.Quantity > 0)
+                {
+                    <p class="small text-muted mb-2">В наличии: @p.Quantity шт.</p>
+                    <form asp-action="AddToCart" method="post" class="d-flex gap-2">
+                        <input type="hidden" name="id" value="@p.Id" />
+                        <input type="hidden" name="category" value="@category" />
+                        <input type="number" name="quantity" value="1" min="1" max="@p.Quantity" class="form-control form-control-sm" style="width:70px" />
+                        <button type="submit" class="btn btn-club btn-sm flex-grow-1">В корзину</button>
+                    </form>
+                }
+                else
+                {
+                    <p class="text-danger mb-0">Нет в наличии</p>
+                }
+            </div>
+        </div>
+    }
+</div>

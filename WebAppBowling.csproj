@@ -18,4 +18,14 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.12" />
   </ItemGroup>
 
+  <!-- старые модели от прошлой версии сайта, в проекте не используются (можно удалить файлы) -->
+  <ItemGroup>
+    <Compile Remove="Models\Comment.cs" />
+    <Compile Remove="Models\Favorite.cs" />
+    <Compile Remove="Models\Feedback.cs" />
+    <Compile Remove="Models\News.cs" />
+    <Compile Remove="Models\Promotion.cs" />
+    <Compile Remove="Models\Role.cs" />
+  </ItemGroup>
+
 </Project>

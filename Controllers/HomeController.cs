@@ -1,20 +1,39 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WebAppBowling.Data;
 using WebAppBowling.Models;
 
 namespace WebAppBowling.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly BowlingContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(BowlingContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
+        // главная страница: категории дорожек с ценами и ближайшие мероприятия
         public IActionResult Index()
         {
+            ViewBag.LaneTypes = _context.LaneTypes
+                .Include(t => t.Lanes)
+                .ToList();
+
+            ViewBag.Events = _context.Events
+                .Where(e => e.EventDate >= DateTime.Today)
+                .OrderBy(e => e.EventDate)
+                .Take(3)
+                .ToList();
+
+            ViewBag.Products = _context.Products
+                .Where(p => p.IsVisible && p.Quantity > 0)
+                .OrderBy(p => p.Price)
+                .Take(4)
+                .ToList();
+
             return View();
         }
 

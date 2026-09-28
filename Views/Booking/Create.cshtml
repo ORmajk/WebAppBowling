@@ -1,0 +1,44 @@
+@model BookingForm
+@{
+    ViewData["Title"] = "Бронирование";
+}
+
+<div class="form-box">
+    <h3 class="page-title mt-0 text-center">Бронирование дорожки</h3>
+
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="All" class="text-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="LaneId" class="form-label"></label>
+            <select asp-for="LaneId" asp-items="ViewBag.Lanes" class="form-select">
+                <option value="">— выберите дорожку —</option>
+            </select>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="Date" class="form-label"></label>
+                <input asp-for="Date" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="Time" class="form-label"></label>
+                <select asp-for="Time" asp-items="ViewBag.Times" class="form-select"></select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="DurationMinutes" class="form-label"></label>
+                <select asp-for="DurationMinutes" asp-items="ViewBag.Durations" class="form-select"></select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="PaymentMethod" class="form-label"></label>
+                <select asp-for="PaymentMethod" asp-items="ViewBag.Payments" class="form-select"></select>
+            </div>
+        </div>
+
+        <p class="small text-muted">Сумма считается автоматически: цена дорожки за час × длительность.
+            Свободное время можно посмотреть на странице <a asp-action="Index">«Дорожки»</a>.</p>
+
+        <button type="submit" class="btn btn-club w-100">Забронировать</button>
+    </form>
+</div>

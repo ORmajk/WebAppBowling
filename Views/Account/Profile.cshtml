@@ -1,0 +1,120 @@
+@model Client
+@{
+    ViewData["Title"] = "Личный кабинет";
+    var bookings = ViewBag.Bookings as List<Booking> ?? new List<Booking>();
+    var orders = ViewBag.Orders as List<Order> ?? new List<Order>();
+}
+
+<h2 class="page-title">Личный кабинет</h2>
+
+<div class="card-club mb-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h5>@Model.FullName</h5>
+            <p class="mb-1">📞 @Model.Phone</p>
+            @if (!string.IsNullOrEmpty(Model.Email))
+            {
+                <p class="mb-1">✉ @Model.Email</p>
+            }
+            <p class="mb-0 text-muted">Клиент с @Model.RegistrationDate.ToString("dd.MM.yyyy")</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <p class="mb-1">Ваши баллы:</p>
+            <p class="price fs-3">@Model.Points</p>
+            <p class="text-muted small mb-0">+10 баллов за каждую бронь</p>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center">
+    <h4 class="page-title">Мои бронирования</h4>
+    <a class="btn btn-club" asp-controller="Booking" asp-action="Create">+ Новая бронь</a>
+</div>
+
+@if (bookings.Count == 0)
+{
+    <p>У вас пока нет бронирований.</p>
+}
+else
+{
+    <table class="table table-bordered table-club">
+        <thead>
+            <tr>
+                <th>Номер</th>
+                <th>Дорожка</th>
+                <th>Дата и время</th>
+                <th>Длительность</th>
+                <th>Сумма</th>
+                <th>Оплата</th>
+                <th>Статус</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var b in bookings)
+            {
+                <tr>
+                    <td>@b.BookingNumber</td>
+                    <td>№@b.Lane?.LaneNumber (@b.Lane?.LaneType?.Name)</td>
+                    <td>@b.StartTime.ToString("dd.MM.yyyy HH:mm") – @b.EndTime.ToString("HH:mm")</td>
+                    <td>@b.DurationMinutes мин.</td>
+                    <td>@b.TotalAmount.ToString("N2") руб.</td>
+                    <td>@b.PaymentMethod</td>
+                    <td><partial name="_StatusBadge" model="b.Status" /></td>
+                    <td>
+                        @if ((b.Status == "Создан" || b.Status == "Оплачен") && b.StartTime > DateTime.Now)
+                        {
+                            <form asp-controller="Booking" asp-action="Cancel" asp-route-id="@b.Id" method="post"
+                                  onsubmit="return confirm('Отменить бронь @(b.BookingNumber)?');">
+                                <button type="submit" class="btn btn-sm btn-danger-club">Отменить</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<div class="d-flex justify-content-between align-items-center">
+    <h4 class="page-title">Мои заказы</h4>
+    <a class="btn btn-club" asp-controller="Catalog" asp-action="Index">В магазин</a>
+</div>
+
+@if (orders.Count == 0)
+{
+    <p>Вы ещё ничего не заказывали.</p>
+}
+else
+{
+    <table class="table table-bordered table-club">
+        <thead>
+            <tr>
+                <th>Номер</th>
+                <th>Дата</th>
+                <th>Состав</th>
+                <th>Сумма</th>
+                <th>Оплата</th>
+                <th>Статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var o in orders)
+            {
+                <tr>
+                    <td>@o.OrderNumber</td>
+                    <td>@o.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>
+                        @foreach (var item in o.OrderItems)
+                        {
+                            <div>@item.Product?.Name × @item.Quantity</div>
+                        }
+                    </td>
+                    <td>@o.TotalAmount.ToString("N2") руб.</td>
+                    <td>@o.PaymentMethod</td>
+                    <td><partial name="_StatusBadge" model="o.Status" /></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

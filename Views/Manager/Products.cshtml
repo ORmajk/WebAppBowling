@@ -1,0 +1,48 @@
+@model List<Product>
+@{
+    ViewData["Title"] = "Товары";
+}
+
+<div class="d-flex justify-content-between align-items-center">
+    <h2 class="page-title">Товары</h2>
+    <a asp-action="ProductCreate" class="btn btn-club">+ Добавить товар</a>
+</div>
+
+<table class="table table-bordered table-club align-middle">
+    <thead>
+        <tr>
+            <th style="width:90px">Фото</th>
+            <th>Название</th>
+            <th>Категория</th>
+            <th>Цена</th>
+            <th>Остаток</th>
+            <th>На сайте</th>
+            <th style="width:200px"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model)
+        {
+            <tr class="@(p.IsVisible ? "" : "table-secondary")">
+                <td>
+                    <img src="@ImageHelper.Product(Env, p.ImageUrl)" alt=""
+                         class="product-thumb" onerror="this.onerror=null; this.src='/images/products/no-photo.svg';" />
+                </td>
+                <td>@p.Name</td>
+                <td>@p.Category</td>
+                <td>@p.Price.ToString("N2")</td>
+                <td class="@(p.Quantity < 5 ? "text-danger fw-bold" : "")">@p.Quantity</td>
+                <td>@(p.IsVisible ? "Да" : "Нет")</td>
+                <td>
+                    <div class="d-flex gap-1">
+                        <a asp-action="ProductEdit" asp-route-id="@p.Id" class="btn btn-sm btn-club">Изменить</a>
+                        <form asp-action="ProductDelete" asp-route-id="@p.Id" method="post"
+                              onsubmit="return confirm('Удалить товар?');">
+                            <button type="submit" class="btn btn-sm btn-danger-club">Удалить</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

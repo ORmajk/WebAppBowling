@@ -1,0 +1,10 @@
+@model string
+@{
+    // цвет значка статуса
+    string css = "status";
+    if (Model == "Оплачен" || Model == "Выдан" || Model == "Доступна") css += " status-green";
+    else if (Model == "Отменён" || Model == "Занята") css += " status-red";
+    else if (Model == "Создан" || Model == "Новый" || Model == "Требует обслуживания") css += " status-orange";
+    else if (Model == "Завершён" || Model == "Готовится") css += " status-blue";
+}
+<span class="@css">@Model</span>
